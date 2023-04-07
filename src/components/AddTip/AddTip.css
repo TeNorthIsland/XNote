@@ -50,6 +50,7 @@
 .hover-modal .icon {
   color: #fff;
   margin-right: 12px;
+  cursor: pointer;
 }
 
 /* color console */
@@ -74,4 +75,39 @@
   width: 15px;
   height: 15px;
   border-radius: 3px;
+}
+
+/* AddComment */
+.comment-console {
+  background-color: #424242;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-bottom: 4px;
+}
+
+.comment-console .text-input {
+  margin-bottom: 10px;
+}
+
+
+/* AddCard */
+.card-console {
+  background-color: #424242;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-bottom: 4px;
+}
+
+.card-console .text-input-title {
+  margin-bottom: 10px;
+}
+
+.card-console .text-input {
+  margin-bottom: 10px;
 }

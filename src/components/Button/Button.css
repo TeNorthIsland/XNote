@@ -1,0 +1,24 @@
+.button-wrap {
+}
+
+.button-wrap :hover {
+  background-color: #5B54B7;
+  opacity: 0.5;
+}
+
+
+/* 清除默认的样式 */
+.button {
+  border: 0;
+  outline: none;
+  background-color: transparent;
+}
+
+.primary  {
+  padding: 4px;
+
+  background-color: #5B54B7;
+  color: #C7C7C7;
+  font-size: 16px;
+  border-radius: 4px;
+}
