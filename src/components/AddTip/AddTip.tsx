@@ -14,11 +14,51 @@ interface InterAddTpsProps {
   onUpdate?: () => void;
 }
 
+// ColorModal 
+interface InterColorModalProps {
+  isShow:boolean,
+  onSelect: (string:string) => any
+}
+
+const ColorModal: React.FC<InterColorModalProps> = (props) => {
+  const { isShow, onSelect } = props
+  const colors = [
+    '#FFFF00',
+    '#FF0000',
+    '#00CA79',
+    '#FF5E00',
+    '#82FF6B',
+    '#007500',
+    '#83CBFC',
+    '#8E00ED',
+    '#F6829D',
+    '#F85B6B',
+    '#70D7AC',
+    '#C7C7C7',
+  ];
+
+  return (
+    <div className="color-console" style={{
+      visibility: !isShow ?  "hidden" : 'unset'
+    }} >
+      {[0,1,2,3,4,5,6,7,8,9,10,11].map((item,indx) => {
+        return (
+          <div key={item}  className="item">
+            <div  className="colors" style={{backgroundColor: colors[indx]}}></div>
+          </div>
+          
+        )
+      })} 
+    </div>
+  )
+}
+
 // HoverModal
 const HoverModal = () => {
   return (
     <div className="hover-modal">
       {/* Modal */}
+      <ColorModal isShow onSelect={()=>{}}></ColorModal>
       {/* <div></div> */}
       {/* content */}
       <div className="line-content">

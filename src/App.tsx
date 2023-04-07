@@ -46,8 +46,8 @@ const HighlightPopup = ({
     </div>
   ) : null;
 
-const PRIMARY_PDF_URL = "https://arxiv.org/pdf/1708.08021.pdf";
-const SECONDARY_PDF_URL = "https://arxiv.org/pdf/1604.02480.pdf";
+const PRIMARY_PDF_URL = "./pdf/1708.08021.pdf";
+const SECONDARY_PDF_URL = "./pdf/1604.02480.pdf";
 
 const searchParams = new URLSearchParams(document.location.search);
 

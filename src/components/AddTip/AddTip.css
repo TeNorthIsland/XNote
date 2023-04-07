@@ -51,3 +51,27 @@
   color: #fff;
   margin-right: 12px;
 }
+
+/* color console */
+.color-console {
+  width: 120px;
+  height: 80px;
+  padding: 8px;
+  background-color: #424242;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  grid-template-rows: repeat(3,1fr);
+}
+.color-console .item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.color-console .item .colors {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+}

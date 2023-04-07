@@ -1,5 +1,5 @@
 export const testHighlights = {
-  "https://arxiv.org/pdf/1708.08021.pdf": [
+  "./pdf/1708.08021.pdf": [
     {
       // 这个可以扩展字段 ，从而实现更多的功能
       content: {
@@ -280,7 +280,7 @@ export const testHighlights = {
       },
     },
   ],
-  "https://arxiv.org/pdf/1604.02480.pdf": [
+  "./pdf/1604.02480.pdf": [
     {
       content: {
         text: "SSA",
