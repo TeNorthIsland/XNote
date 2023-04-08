@@ -1,7 +1,7 @@
-import React, { Component, useEffect, useState } from "react";
+import React, { Component, useEffect, useLayoutEffect, useState } from "react";
 import Button from "../Button/Button";
 import TextArea from "../TextAre/Textarea";
-
+import Popover from '@mui/material/Popover';
 import "./AddTip.css";
 
 interface State {
@@ -52,7 +52,7 @@ const ColorModal: React.FC<InterColorModalProps> = (props) => {
     <>
     {isShow && 
       (
-        <div className="color-console" >
+        <div id="color-console" className="color-console" >
           {[0,1,2,3,4,5,6,7,8,9,10,11].map((item,indx) => {
             return (
               <div key={item}  className="item">
@@ -76,7 +76,7 @@ const AddComment: React.FC<InterAddCommentProps> = (props) => {
     <>
       {
         isShow && (
-          <div className="comment-console">
+          <div id="comment-console" className="comment-console">
                 <TextArea 
                    placeholder="Common" 
                    className="text-input"
@@ -102,7 +102,7 @@ const AddCard: React.FC<InterAddCardProps> = (props) => {
     <>
     {
       isShow && (
-      <div className="card-console">
+      <div id="card-console" className="card-console">
           <TextArea 
                   placeholder="TItle" 
                   className="text-input-title"
@@ -144,14 +144,15 @@ interface InterHoverModalData {
     content: string
   }
 }
-const HoverModal = (props:any) => {
 
+const AddTip:React.FC<InterAddTpsProps> = (props) => {
+  
+  const { onOpen } = props
   const [ consoleShow, setConsoleShow ] = useState<InterHoverModalShow>({
     showCardConsole:false,
     showColorConsole:false,
     showCommentConsole:false
   });
-
   const [data, setData]= useState<InterHoverModalData>({
     colors:'',
     comment:'',
@@ -160,28 +161,33 @@ const HoverModal = (props:any) => {
       content: ''
     }
   })
+  const [height, setHeight] = useState(0);
 
   const changeShowConsole = (type: 'color' | 'comment' | 'card') => {
+    onOpen && onOpen();
     switch (type) {
       case 'color':
         setConsoleShow({
-          ...consoleShow,
+          showCardConsole:false,
+          showCommentConsole:false,
           showColorConsole: !consoleShow.showColorConsole
         })
         break;
 
         case 'comment':
           setConsoleShow({
-            ...consoleShow,
-            showCommentConsole: !consoleShow.showCommentConsole
+            showCardConsole:false,
+            showCommentConsole: !consoleShow.showCommentConsole,
+            showColorConsole: false
           })
         
         break;
 
         case 'card':
           setConsoleShow({
-            ...consoleShow,
-            showCardConsole: !consoleShow.showCommentConsole
+            showCardConsole: !consoleShow.showCardConsole,
+            showCommentConsole:false,
+            showColorConsole: false
           })        
         break;
     
@@ -190,13 +196,46 @@ const HoverModal = (props:any) => {
     }
   }
   
+  const getConsoleHeight = () => {
+    
+    const consoleMap = {
+      showColorConsole:document.querySelector('#color-console')!,
+      showCommentConsole:document.querySelector('#comment-console')!,
+      showCardConsole:document.querySelector('#card-console')!,
+    };
+
+    const height = ():number => {
+      if(consoleShow?.showCardConsole) {
+        return consoleMap?.showCardConsole?.clientHeight || 0
+      }
+      if(consoleShow?.showColorConsole) {
+        return consoleMap?.showColorConsole?.clientHeight || 0
+      }
+      if(consoleShow?.showCommentConsole) {
+        return consoleMap?.showCommentConsole?.clientHeight || 0
+      }
+      return 0
+    };
+
+    setHeight(-(height() + 10 ))
+  }
+  
+  useLayoutEffect(()=>{
+    getConsoleHeight()
+  },[consoleShow.showCardConsole, consoleShow.showColorConsole, consoleShow.showCommentConsole]);
+
   return (
-    <div className="hover-modal">
-      <ColorModal isShow={consoleShow.showColorConsole} onSelect={()=>{}}></ColorModal>
-      <AddComment isShow={consoleShow.showCommentConsole}></AddComment>
-      <AddCard isShow={consoleShow.showCardConsole}></AddCard>
+    <div className="hover-modal" >
+      <div className="console" style={{
+        position:'absolute',
+        top:height
+      }} >
+        <ColorModal isShow={consoleShow.showColorConsole} onSelect={()=>{}}></ColorModal>
+        <AddComment isShow={consoleShow.showCommentConsole}></AddComment>
+        <AddCard isShow={consoleShow.showCardConsole}></AddCard>
+      </div>
       
-      <div className="line-content">
+      <div id="line-content" className="line-content">
         <div className="icon fist-icon" onClick={()=> changeShowConsole('color')}>
           <span>笔刷</span>
         </div>
@@ -215,87 +254,6 @@ const HoverModal = (props:any) => {
 
       </div>
     </div>
-  )
-}
-
-
-const AddTip:React.FC<InterAddTpsProps> = (props) => {
-  const {
-    onConfirm,
-    onOpen,
-    onUpdate
-  } = props
-
-  const [compact, setCompact] = useState(true);
-  const [data,setData] = useState({
-    text:'',
-    emoji:''
-  });
-
-  useEffect(() => {
-    onUpdate && onUpdate();
-  }, [compact])
-  
-  return  (
-      <div className="Tip">
-        {compact ? (
-          /**
-<div
-    className="Tip__compact"
-    onClick={() => {
-      onOpen();
-      this.setState({ compact: false });
-    }}
-  >
-    Add highlight
-  </div>
-           */
-          <HoverModal />
-        ) : (
-          <form
-            className="Tip__card"
-            onSubmit={(event) => {
-              event.preventDefault();
-              onConfirm({ text:data.text, emoji:data.emoji });
-            }}
-          >
-            <div>
-              <textarea
-                placeholder="Your comment"
-                autoFocus
-                value={data.text}
-                onChange={(event) =>
-                  setData({...data, text: event.target.value})
-                }
-                ref={(node) => {
-                  if (node) {
-                    node.focus();
-                  }
-                }}
-              />
-              <div>
-                {["💩", "😱", "😍", "🔥", "😳", "⚠️"].map((_emoji) => (
-                  <label key={_emoji}>
-                    <input
-                      checked={data.emoji === _emoji}
-                      type="radio"
-                      name="emoji"
-                      value={_emoji}
-                      onChange={(event) =>
-                        setData({...data, emoji: event.target.value})
-                      }
-                    />
-                    {_emoji}
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div>
-              <input type="submit" value="Save" />
-            </div>
-          </form>
-        )}
-      </div>
   )
 }
 

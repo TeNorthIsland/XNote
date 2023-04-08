@@ -1,22 +1,20 @@
 /*eslint-disable */
+/*eslint-disable-next-line */
+/*react-internal/no-production-logging*/
+
 // @ts-nocheck
-import React, { Component } from "react";
+import React, {Component} from 'react';
 
-import {
-  PdfLoader,
-  PdfHighlighter,
-  Popup,
-  AreaHighlight,
-} from "react-pdf-highlighter";
+import {PdfLoader, PdfHighlighter, Popup, AreaHighlight, Tip, PdfHighlighter2} from './PDFCore';
 
-import type { IHighlight, NewHighlight } from "react-pdf-highlighter";
+import type {IHighlight, NewHighlight} from './PDFCore';
 
-import { testHighlights as _testHighlights } from "./test-highlights";
-import { Spinner } from "./Spinner";
-import { Sidebar } from "./Sidebar";
-import { Highlight } from './components/Highlight/Highlight'
-import AddTip from './components/AddTip/AddTip'
-import "./style/App.css";
+import {testHighlights as _testHighlights} from './test-highlights';
+import {Spinner} from './Spinner';
+import {Sidebar} from './Sidebar';
+import {Highlight} from './components/Highlight/Highlight';
+import AddTip from './components/AddTip/AddTip';
+import './style/App.css';
 
 const testHighlights: Record<string, Array<IHighlight>> = _testHighlights;
 
@@ -27,35 +25,30 @@ interface State {
 
 const getNextId = () => String(Math.random()).slice(2);
 
-// 通过 #铆点 定位id 
-const parseIdFromHash = () =>
-  document.location.hash.slice("#highlight-".length);
+// 通过 #铆点 定位id
+const parseIdFromHash = () => document.location.hash.slice('#highlight-'.length);
 
 const resetHash = () => {
-  document.location.hash = "";
+  document.location.hash = '';
 };
 
-const HighlightPopup = ({
-  comment,
-}: {
-  comment: { text: string; emoji: string };
-}) =>
+const HighlightPopup = ({comment}: {comment: {text: string; emoji: string}}) =>
   comment.text ? (
     <div className="Highlight__popup">
       {comment.emoji} {comment.text}
     </div>
   ) : null;
 
-const PRIMARY_PDF_URL = "./pdf/1708.08021.pdf";
-const SECONDARY_PDF_URL = "./pdf/1604.02480.pdf";
+const PRIMARY_PDF_URL = './pdf/1708.08021.pdf';
+const SECONDARY_PDF_URL = './pdf/1604.02480.pdf';
 
 const searchParams = new URLSearchParams(document.location.search);
 
-const initialUrl = searchParams.get("url") || PRIMARY_PDF_URL;
+const initialUrl = searchParams.get('url') || PRIMARY_PDF_URL;
 
 class App extends Component<{}, State> {
   state = {
-    url: initialUrl, // url 
+    url: initialUrl, // url
     highlights: testHighlights[initialUrl] // 数据
       ? [...testHighlights[initialUrl]]
       : [],
@@ -70,8 +63,7 @@ class App extends Component<{}, State> {
 
   // 切换文档
   toggleDocument = () => {
-    const newUrl =
-      this.state.url === PRIMARY_PDF_URL ? SECONDARY_PDF_URL : PRIMARY_PDF_URL;
+    const newUrl = this.state.url === PRIMARY_PDF_URL ? SECONDARY_PDF_URL : PRIMARY_PDF_URL;
 
     this.setState({
       url: newUrl,
@@ -80,9 +72,7 @@ class App extends Component<{}, State> {
   };
 
   // 滚动到
-  scrollViewerTo = (highlight: any) => {
-    console.log('highlight ->', highlight);
-  };
+  scrollViewerTo = (highlight: any) => {};
 
   // 滚动
   scrollToHighlightFromHash = () => {
@@ -94,47 +84,34 @@ class App extends Component<{}, State> {
   };
 
   componentDidMount() {
-    window.addEventListener(
-      "hashchange",
-      this.scrollToHighlightFromHash,
-      false
-    );
+    window.addEventListener('hashchange', this.scrollToHighlightFromHash, false);
   }
 
   // 依据id 获取高亮节点
   getHighlightById(id: string) {
-    const { highlights } = this.state;
+    const {highlights} = this.state;
 
     return highlights.find((highlight) => highlight.id === id);
   }
 
   // 添加高亮点
   addHighlight(highlight: NewHighlight) {
-    const { highlights } = this.state;
-
-    console.log("Saving highlight", highlight);
+    const {highlights} = this.state;
 
     this.setState({
-      highlights: [{ ...highlight, id: getNextId() }, ...highlights],
+      highlights: [{...highlight, id: getNextId()}, ...highlights],
     });
   }
 
   updateHighlight(highlightId: string, position: Object, content: Object) {
-    console.log("Updating highlight", highlightId, position, content);
-
     this.setState({
       highlights: this.state.highlights.map((h) => {
-        const {
-          id,
-          position: originalPosition,
-          content: originalContent,
-          ...rest
-        } = h;
+        const {id, position: originalPosition, content: originalContent, ...rest} = h;
         return id === highlightId
           ? {
               id,
-              position: { ...originalPosition, ...position },
-              content: { ...originalContent, ...content },
+              position: {...originalPosition, ...position},
+              content: {...originalContent, ...content},
               ...rest,
             }
           : h;
@@ -143,55 +120,54 @@ class App extends Component<{}, State> {
   }
 
   render() {
-    const { url, highlights } = this.state;
+    const {url, highlights} = this.state;
 
     return (
       <div className="App">
-        <div
-          className="pdf-content"
-        >
+        <div className="pdf-content">
           <PdfLoader url={url} beforeLoad={<Spinner />}>
             {(pdfDocument) => (
-              <PdfHighlighter
+              <PdfHighlighter2
                 pdfDocument={pdfDocument}
                 enableAreaSelection={(event) => event.altKey} // 区域选择器
-                // enableAreaSelection={true}
                 onScrollChange={resetHash}
                 // pdfScaleValue="page-width" // 充满屏幕
-                scrollRef={(scrollTo) => { // 用于定位和滚动屏幕
+                scrollRef={(scrollTo) => {
+                  // 用于定位和滚动屏幕
                   this.scrollViewerTo = scrollTo;
 
                   this.scrollToHighlightFromHash();
                 }}
-                onSelectionFinished={( // 当选择结束之后  add 的时候
+                onSelectionFinished={(
+                  // 当选择结束之后  add 的时候
                   position,
                   content,
                   hideTipAndSelection,
-                  transformSelection
+                  transformSelection,
                 ) => (
                   // 重构 能够满足我们吗？
-                  <AddTip
+                  <Tip
+                    content={content}
                     onOpen={transformSelection}
                     onConfirm={(comment) => {
-                      this.addHighlight({ content, position, comment });
+                      this.addHighlight({content, position, comment});
                       hideTipAndSelection();
                     }}
                   />
                 )}
-                highlightTransform={( // 转换 高亮条
+                highlightTransform={(
+                  // 转换 高亮条
                   highlight,
                   index,
                   setTip,
                   hideTip,
                   viewportToScaled,
                   screenshot,
-                  isScrolledTo
+                  isScrolledTo,
                 ) => {
-                  const isTextHighlight = !Boolean(
-                    highlight.content && highlight.content.image
-                  );
+                  const isTextHighlight = !Boolean(highlight.content && highlight.content.image);
 
-                  // 看看是文字还是区域 
+                  // 看看是文字还是区域
                   const component = isTextHighlight ? (
                     // 重构完全可以自实现
                     <Highlight
@@ -199,7 +175,7 @@ class App extends Component<{}, State> {
                       position={highlight.position}
                       comment={highlight.comment}
                       style={{
-                        color:'red'
+                        color: 'red',
                       }}
                     />
                   ) : (
@@ -209,8 +185,8 @@ class App extends Component<{}, State> {
                       onChange={(boundingRect) => {
                         this.updateHighlight(
                           highlight.id,
-                          { boundingRect: viewportToScaled(boundingRect) },
-                          { image: screenshot(boundingRect) }
+                          {boundingRect: viewportToScaled(boundingRect)},
+                          {image: screenshot(boundingRect)},
                         );
                       }}
                     />
@@ -220,9 +196,7 @@ class App extends Component<{}, State> {
                   return (
                     <Popup
                       popupContent={<HighlightPopup {...highlight} />}
-                      onMouseOver={(popupContent) =>
-                        setTip(highlight, (highlight) => popupContent)
-                      }
+                      onMouseOver={(popupContent) => setTip(highlight, (highlight) => popupContent)}
                       onMouseOut={hideTip}
                       key={index}
                       children={component}
@@ -234,11 +208,7 @@ class App extends Component<{}, State> {
             )}
           </PdfLoader>
         </div>
-        <Sidebar
-          highlights={highlights}
-          resetHighlights={this.resetHighlights}
-          toggleDocument={this.toggleDocument}
-        />
+        <Sidebar highlights={highlights} resetHighlights={this.resetHighlights} toggleDocument={this.toggleDocument} />
       </div>
     );
   }

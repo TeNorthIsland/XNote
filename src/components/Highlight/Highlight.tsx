@@ -3,7 +3,7 @@ import React, { Component } from "react";
 
 import "./Highlight.css";
 
-import type { LTWHP } from "react-pdf-highlighter";
+import type { LTWHP } from "../../PDFCore";
 
 // 进行重写和扩展
 interface Props {
@@ -61,7 +61,9 @@ export  class Highlight extends Component<Props> {
               onMouseOut={onMouseOut}
               onClick={onClick}
               key={index}
-              style={{...rect, backgroundColor: this.props.style.color }}
+              style={{...rect, 
+                backgroundColor: this.props.style.color
+               }}
               className={`Highlight__part`}
             />
           ))}

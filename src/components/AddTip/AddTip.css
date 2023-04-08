@@ -53,6 +53,11 @@
   cursor: pointer;
 }
 
+.console {
+  position: absolute;
+}
+
+
 /* color console */
 .color-console {
   width: 120px;
@@ -76,6 +81,7 @@
   height: 15px;
   border-radius: 3px;
 }
+
 
 /* AddComment */
 .comment-console {
