@@ -568,7 +568,8 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<Props
     return (
       <div onPointerDown={this.onMouseDown}>
         <div ref={this.attachRef} className="PdfHighlighter" onContextMenu={(e) => e.preventDefault()}>
-          <div className="pdfViewer" />
+          {/* 单独的更改一些class ？ */}
+          <div className="pdfViewer pdfViewer2" />
           {this.renderTip()}
           {typeof enableAreaSelection === 'function' ? (
             <MouseSelection
@@ -658,11 +659,9 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
     updateNumber: 0,
   });
 
-  const [_viewerRef, set_ViewerRef] = useState<{current: PDFViewer}>();
-
   const handleScaleValue = () => {
-    if (_viewerRef.current) {
-      _viewerRef.current.currentScaleValue = pdfScaleValue; //"page-width";
+    if (_viewerRef.current.PDFViewer) {
+      _viewerRef.current.PDFViewer.currentScaleValue = pdfScaleValue; //"page-width";
     }
   };
   const debouncedScaleValue: () => void = debounce(handleScaleValue, 500);
@@ -679,20 +678,18 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
   let unsubscribe = () => {};
 
   const iniViewRef = () => {
-    set_ViewerRef({
-      current: new PDFViewer({
-        container: _containerNodeRef.current!,
-        eventBus: _eventBusRef.current,
-        // enhanceTextSelection: true, // deprecated. https://github.com/mozilla/pdf.js/issues/9943#issuecomment-409369485
-        textLayerMode: 2,
-        removePageBorders: true,
-        linkService: _linkServiceRef.current,
-        l10n: NullL10n,
-      }),
+    _viewerRef.current.PDFViewer = new PDFViewer({
+      container: _containerNodeRef.current!,
+      eventBus: _eventBusRef.current,
+      // enhanceTextSelection: true, // deprecated. https://github.com/mozilla/pdf.js/issues/9943#issuecomment-409369485
+      textLayerMode: 2,
+      removePageBorders: true,
+      linkService: _linkServiceRef.current,
+      l10n: NullL10n,
     });
   };
 
-  // let _viewerRef = useRef<PDFViewer>(null);
+  let _viewerRef = useRef<{PDFViewer?: PDFViewer}>({PDFViewer: undefined});
 
   const attachRef = () => {
     unsubscribe();
@@ -731,18 +728,18 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
 
   const init = () => {
     _linkServiceRef.current.setDocument(pdfDocument);
-    _linkServiceRef.current.setViewer(_viewerRef.current!);
-    _viewerRef.current!.setDocument(pdfDocument);
+    _linkServiceRef.current.setViewer(_viewerRef.current.PDFViewer!);
+    _viewerRef.current.PDFViewer!.setDocument(pdfDocument);
 
     // debug
     (window as any).PdfViewer = this;
   };
 
   const findOrCreateHighlightLayer = (page: number) => {
-    if (!_viewerRef.current) {
+    if (!_viewerRef.current.PDFViewer) {
       return;
     }
-    const {textLayer} = _viewerRef.current.getPageView(page - 1) || {};
+    const {textLayer} = _viewerRef.current.PDFViewer.getPageView(page - 1) || {};
 
     if (!textLayer) {
       return null;
@@ -813,7 +810,7 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
   };
 
   const scaledPositionToViewport = ({pageNumber, boundingRect, rects, usePdfCoordinates}: ScaledPosition): Position => {
-    const viewport = _viewerRef.current!.getPageView(pageNumber - 1).viewport;
+    const viewport = _viewerRef.current.PDFViewer?.getPageView(pageNumber - 1).viewport;
 
     return {
       boundingRect: scaledToViewport(boundingRect, viewport, usePdfCoordinates),
@@ -823,7 +820,7 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
   };
 
   const viewportPositionToScaled = ({pageNumber, boundingRect, rects}: Position): ScaledPosition => {
-    const viewport = _viewerRef.current.getPageView(pageNumber - 1).viewport;
+    const viewport = _viewerRef.current.PDFViewer?.getPageView(pageNumber - 1).viewport;
 
     return {
       boundingRect: viewportToScaled(boundingRect, viewport),
@@ -833,7 +830,7 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
   };
 
   const screenshot = (position: LTWH, pageNumber: number) => {
-    const canvas = _viewerRef.current.getPageView(pageNumber - 1).canvas;
+    const canvas = _viewerRef.current.PDFViewer?.getPageView(pageNumber - 1).canvas;
 
     return getAreaAsPng(canvas, position);
   };
@@ -878,7 +875,9 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
                 },
                 hideTipAndSelection,
                 (rect) => {
-                  const viewport = _viewerRef.current.getPageView((rect.pageNumber || pageNumber) - 1).viewport;
+                  const viewport = _viewerRef.current.PDFViewer?.getPageView(
+                    (rect.pageNumber || pageNumber) - 1,
+                  ).viewport;
 
                   return viewportToScaled(rect, viewport);
                 },
@@ -923,7 +922,7 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
 
     const {boundingRect, pageNumber} = tipPosition;
     const page = {
-      node: _viewerRef.current.getPageView((boundingRect.pageNumber || pageNumber) - 1).div,
+      node: _viewerRef.current.PDFViewer?.getPageView((boundingRect.pageNumber || pageNumber) - 1).div,
       pageNumber: boundingRect.pageNumber || pageNumber,
     };
 
@@ -943,7 +942,7 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
 
     return (
       <TipContainer
-        scrollTop={_viewerRef.current.container.scrollTop}
+        scrollTop={_viewerRef.current.PDFViewer!.container.scrollTop}
         pageBoundingRect={pageBoundingRect}
         style={{
           left: page.node.offsetLeft + boundingRect.left + boundingRect.width / 2,
@@ -963,13 +962,13 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
   const scrollTo = (highlight: IHighlight) => {
     const {pageNumber, boundingRect, usePdfCoordinates} = highlight.position;
 
-    _viewerRef.current.container.removeEventListener('scroll', onScroll);
+    _viewerRef.current.PDFViewer?.container.removeEventListener('scroll', onScroll);
 
-    const pageViewport = _viewerRef.current.getPageView(pageNumber - 1).viewport;
+    const pageViewport = _viewerRef.current.PDFViewer?.getPageView(pageNumber - 1).viewport;
 
     const scrollMargin = 10;
 
-    _viewerRef.current.scrollPageIntoView({
+    _viewerRef.current.PDFViewer?.scrollPageIntoView({
       pageNumber,
       destArray: [
         null,
@@ -991,7 +990,7 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
 
     // wait for scrolling to finish
     setTimeout(() => {
-      _viewerRef.current.container.addEventListener('scroll', onScroll);
+      _viewerRef.current.PDFViewer?.container.addEventListener('scroll', onScroll);
     }, 100);
   };
 
@@ -1038,7 +1037,7 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
 
     updateStatus();
 
-    _viewerRef.current.container.removeEventListener('scroll', onScroll);
+    _viewerRef.current.PDFViewer?.container.removeEventListener('scroll', onScroll);
   };
 
   const onMouseDown: PointerEventHandler = (event) => {
@@ -1111,7 +1110,7 @@ const PdfHighlighter2: React.FC<Props<IHighlight>> = (props) => {
   const debouncedAfterSelection: () => void = debounce(afterSelection, 500);
 
   const toggleTextSelection = (flag: boolean) => {
-    _viewerRef.current.viewer!.classList.toggle('PdfHighlighter--disable-selection', flag);
+    _viewerRef.current.PDFViewer?.viewer!.classList.toggle('PdfHighlighter--disable-selection', flag);
   };
 
   return (

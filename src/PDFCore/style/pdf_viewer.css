@@ -1,5 +1,4 @@
 /* overrides for pdf_viewer.css from PDF.JS web viewer */
-
 .textLayer {
   z-index: 2;
   opacity: 1;
@@ -22,10 +21,17 @@ html
   mix-blend-mode: multiply;
 }
 
-.textLayer ::selection {
-  background: rgba(252, 232, 151, 1);
+/* testColor1 */
+.pdfViewer   .textLayer ::selection {
+  background-color: rgba(0, 0, 255, 0.2);
   mix-blend-mode: multiply;
 }
+
+/* 测试成功这样是可以的 */
+/* .pdfViewer2   .textLayer ::selection {
+  background-color: red !important;
+  mix-blend-mode: multiply;
+} */
 
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
   .textLayer {opacity: 0.5;}

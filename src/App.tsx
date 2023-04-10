@@ -127,7 +127,7 @@ class App extends Component<{}, State> {
         <div className="pdf-content">
           <PdfLoader url={url} beforeLoad={<Spinner />}>
             {(pdfDocument) => (
-              <PdfHighlighter2
+              <PdfHighlighter
                 pdfDocument={pdfDocument}
                 enableAreaSelection={(event) => event.altKey} // 区域选择器
                 onScrollChange={resetHash}
@@ -135,7 +135,6 @@ class App extends Component<{}, State> {
                 scrollRef={(scrollTo) => {
                   // 用于定位和滚动屏幕
                   this.scrollViewerTo = scrollTo;
-
                   this.scrollToHighlightFromHash();
                 }}
                 onSelectionFinished={(
@@ -146,7 +145,7 @@ class App extends Component<{}, State> {
                   transformSelection,
                 ) => (
                   // 重构 能够满足我们吗？
-                  <Tip
+                  <AddTip
                     content={content}
                     onOpen={transformSelection}
                     onConfirm={(comment) => {
